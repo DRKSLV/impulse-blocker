@@ -11,7 +11,7 @@ import { backgroundResponse } from './utils/functions';
 
 const blocker = new ImpulseBlocker();
 
-StorageHandler.getExtensionStatus().then(storage => {
+StorageHandler.getExtensionStatus().then((storage) => {
   if (storage.status === ExtensionStatus.ON) {
     blocker.start();
 
@@ -19,7 +19,7 @@ StorageHandler.getExtensionStatus().then(storage => {
   }
 
   if (storage.status === ExtensionStatus.PAUSED) {
-    StorageHandler.getPausedUntil().then(data => {
+    StorageHandler.getPausedUntil().then((data) => {
       const pausedUntilISO = data.pausedUntil;
 
       if (!pausedUntilISO) {
@@ -57,43 +57,36 @@ StorageHandler.getExtensionStatus().then(storage => {
 const messageHandlers = {
   [MessageTypes.GET_CURRENT_DOMAIN]: () => DomainParser.getCurrentDomain(),
 
-  [MessageTypes.IS_DOMAIN_BLOCKED]: req =>
-    StorageHandler.isDomainBlocked(req.domain),
+  [MessageTypes.IS_DOMAIN_BLOCKED]: (req) => StorageHandler.isDomainBlocked(req.domain),
 
-  [MessageTypes.GET_EXTENSION_STATUS]: () =>
-    Promise.all([blocker.getStatus(), blocker.getSettings()]).then(values => ({
-      extensionStatus: values[0].status,
-      extensionSettings: values[1].extensionSettings,
-      pausedUntil: blocker.getPausedUntil(),
-    })),
+  [MessageTypes.GET_EXTENSION_STATUS]:
+  () => Promise.all([blocker.getStatus(), blocker.getSettings()]).then((values) => ({
+    extensionStatus: values[0].status,
+    extensionSettings: values[1].extensionSettings,
+    pausedUntil: blocker.getPausedUntil(),
+  })),
 
-  [MessageTypes.UPDATE_EXTENSION_STATUS]: req =>
-    blocker[req.parameter === ExtensionStatus.ON ? 'start' : 'stop'](),
+  [MessageTypes.UPDATE_EXTENSION_STATUS]: (req) => blocker[req.parameter === ExtensionStatus.ON ? 'start' : 'stop'](),
 
-  [MessageTypes.START_BLOCKING_DOMAIN]: req =>
-    StorageHandler.addWebsite(req.domain.replace(/^www\./, '')),
+  [MessageTypes.START_BLOCKING_DOMAIN]: (req) => StorageHandler.addWebsite(req.domain.replace(/^www\./, '')),
 
-  [MessageTypes.START_ALLOWING_DOMAIN]: req =>
-    StorageHandler.removeWebsite(req.domain.replace(/^www\./, '')),
+  [MessageTypes.START_ALLOWING_DOMAIN]: (req) => StorageHandler.removeWebsite(req.domain.replace(/^www\./, '')),
 
-  [MessageTypes.GET_BLOCKED_DOMAINS_LIST]: () =>
-    backgroundResponse(StorageHandler.getWebsiteDomains()),
+  [MessageTypes.GET_BLOCKED_DOMAINS_LIST]:
+    () => backgroundResponse(StorageHandler.getWebsiteDomains()),
 
-  [MessageTypes.PAUSE_BLOCKER]: req => blocker.pause(req.duration),
+  [MessageTypes.PAUSE_BLOCKER]: (req) => blocker.pause(req.duration),
 
-  [MessageTypes.UNPAUSE_BLOCKER]: req => blocker.unpause(req.duration),
+  [MessageTypes.UNPAUSE_BLOCKER]: (req) => blocker.unpause(req.duration),
 
-  [MessageTypes.UPDATE_EXTENSION_SETTING]: req =>
-    blocker.updateSettings(req.key, req.value),
+  [MessageTypes.UPDATE_EXTENSION_SETTING]: (req) => blocker.updateSettings(req.key, req.value),
 
-  default: req => {
+  default: (req) => {
     throw new Error('Message type not recognized: ', req.type);
   },
 };
 
-browser.runtime.onMessage.addListener(req =>
-  (messageHandlers[req.type] || messageHandlers.default)(req),
-);
+browser.runtime.onMessage.addListener((req) => (messageHandlers[req.type] || messageHandlers.default)(req));
 
 /**
  * In versions before 1.0, the blocked website domains were stored as array of strings
@@ -102,9 +95,9 @@ browser.runtime.onMessage.addListener(req =>
  * Website model represents that object in storage.
  */
 browser.runtime.onInstalled.addListener(() => {
-  browser.storage.local.get('sites').then(storage => {
+  browser.storage.local.get('sites').then((storage) => {
     if (Array.isArray(storage.sites)) {
-      const updatedSitesArray = storage.sites.map(url => {
+      const updatedSitesArray = storage.sites.map((url) => {
         if (typeof url === 'string') {
           return Website.create(url);
         }
@@ -123,7 +116,7 @@ browser.runtime.onInstalled.addListener(() => {
     }
   });
 
-  browser.storage.local.get('extensionSettings').then(storage => {
+  browser.storage.local.get('extensionSettings').then((storage) => {
     if (!Array.isArray(storage.extensionSettings)) {
       return browser.storage.local.set({
         extensionSettings: [
@@ -140,7 +133,7 @@ browser.runtime.onInstalled.addListener(() => {
     }
   });
 
-  browser.storage.local.get('status').then(storage => {
+  browser.storage.local.get('status').then((storage) => {
     if (!storage.status) {
       return browser.storage.local.set({ status: ExtensionStatus.ON });
     }

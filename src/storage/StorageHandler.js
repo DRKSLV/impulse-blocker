@@ -4,8 +4,8 @@ export default class StorageHandler {
   static async getWebsiteDomainsAsMatchPatterns() {
     const { sites } = await StorageHandler.getBlockedWebsites();
 
-    return new Promise(resolve => {
-      const mappedWebsites = sites.map(website => `*://*.${website.domain}/*`);
+    return new Promise((resolve) => {
+      const mappedWebsites = sites.map((website) => `*://*.${website.domain}/*`);
 
       resolve(mappedWebsites);
     });
@@ -13,7 +13,7 @@ export default class StorageHandler {
 
   static async getWebsiteDomains() {
     const { sites } = await StorageHandler.getBlockedWebsites();
-    return sites.map(website => website.domain);
+    return sites.map((website) => website.domain);
   }
 
   static getBlockedWebsites() {
@@ -26,7 +26,7 @@ export default class StorageHandler {
   }
 
   static addWebsite(url) {
-    return browser.storage.local.get('sites').then(storage => {
+    return browser.storage.local.get('sites').then((storage) => {
       const updatedWebsites = [...storage.sites, Website.create(url)];
 
       return browser.storage.local.set({
@@ -36,9 +36,9 @@ export default class StorageHandler {
   }
 
   static removeWebsite(url) {
-    return browser.storage.local.get('sites').then(storage => {
+    return browser.storage.local.get('sites').then((storage) => {
       const updatedWebsites = storage.sites.filter(
-        website => website.domain !== url,
+        (website) => website.domain !== url,
       );
 
       return browser.storage.local.set({
@@ -72,9 +72,9 @@ export default class StorageHandler {
   }
 
   static updateExtensionSettings(key, value) {
-    return browser.storage.local.get('extensionSettings').then(storage => {
+    return browser.storage.local.get('extensionSettings').then((storage) => {
       const updatedSettings = storage.extensionSettings.filter(
-        setting => setting.key !== key,
+        (setting) => setting.key !== key,
       );
       updatedSettings.push({ key, value });
 

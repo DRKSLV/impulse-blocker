@@ -9,7 +9,11 @@ import Website from './storage/Website';
 import DomainParser from './utils/DomainParser';
 import { backgroundResponse } from './utils/functions';
 
-const blocker = new ImpulseBlocker();
+const storageHandler = new StorageHandler(browser.storage);
+
+const blocker = new ImpulseBlocker(storageHandler, browser);
+
+blocker.boot();
 
 StorageHandler.getExtensionStatus().then((storage) => {
   if (storage.status === ExtensionStatus.ON) {
@@ -59,12 +63,13 @@ const messageHandlers = {
 
   [MessageTypes.IS_DOMAIN_BLOCKED]: (req) => StorageHandler.isDomainBlocked(req.domain),
 
-  [MessageTypes.GET_EXTENSION_STATUS]:
-  () => Promise.all([blocker.getStatus(), blocker.getSettings()]).then((values) => ({
-    extensionStatus: values[0].status,
-    extensionSettings: values[1].extensionSettings,
-    pausedUntil: blocker.getPausedUntil(),
-  })),
+  [MessageTypes.GET_EXTENSION_STATUS]: () => Promise.all([blocker.getStatus(), blocker.getSettings()]).then(
+    (values) => ({
+      extensionStatus: values[0].status,
+      extensionSettings: values[1].extensionSettings,
+      pausedUntil: blocker.getPausedUntil(),
+    }),
+  ),
 
   [MessageTypes.UPDATE_EXTENSION_STATUS]: (req) => blocker[req.parameter === ExtensionStatus.ON ? 'start' : 'stop'](),
 
@@ -72,8 +77,7 @@ const messageHandlers = {
 
   [MessageTypes.START_ALLOWING_DOMAIN]: (req) => StorageHandler.removeWebsite(req.domain.replace(/^www\./, '')),
 
-  [MessageTypes.GET_BLOCKED_DOMAINS_LIST]:
-    () => backgroundResponse(StorageHandler.getWebsiteDomains()),
+  [MessageTypes.GET_BLOCKED_DOMAINS_LIST]: () => backgroundResponse(StorageHandler.getWebsiteDomains()),
 
   [MessageTypes.PAUSE_BLOCKER]: (req) => blocker.pause(req.duration),
 

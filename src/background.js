@@ -4,14 +4,12 @@ import ImpulseBlocker from './ImpulseBlocker';
 import MessageTypes from './enums/messages';
 import ExtensionStatus from './enums/extensionStatus';
 import SettingTypes from './enums/settings';
-import StorageHandler from './storage/StorageHandler';
+import storageHandler from './storage/StorageHandler';
 import Website from './storage/Website';
 import DomainParser from './utils/DomainParser';
 import { backgroundResponse } from './utils/functions';
 
-const storageHandler = new StorageHandler(browser.storage);
-
-const blocker = new ImpulseBlocker(storageHandler, browser);
+const blocker = new ImpulseBlocker();
 
 blocker.boot();
 

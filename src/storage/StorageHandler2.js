@@ -1,6 +1,6 @@
 import Website from './Website';
 
-export default class StorageHandler {
+export default class StorageHandler2 {
   static async getWebsiteDomainsAsMatchPatterns() {
     const { sites } = await StorageHandler.getBlockedWebsites();
 
